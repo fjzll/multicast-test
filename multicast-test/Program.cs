@@ -121,8 +121,11 @@ namespace multicast_test
                             {
                                 using (var client = new UdpClient())
                                 {
-                                    client.EnableBroadcast = true;
-                                    client.Client.SetSocketOption((_bindingAddress.AddressFamily == AddressFamily.InterNetwork) ? SocketOptionLevel.IP : SocketOptionLevel.IPv6, SocketOptionName.MulticastTimeToLive, TTL);
+                                    // Bind to the selected local interface
+                                    client.Client.Bind(new IPEndPoint(_bindingAddress, 0));
+
+                                    // ✅ Set the TTL for multicast packets here (required for crossing VLANs/routers)
+                                    client.Client.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.MulticastTimeToLive, TTL);
 
                                     Console.WriteLine($"\nBound udp client to {_bindingAddress}. Sending data to multicast group address {MulticastAddress}");
                                     Console.WriteLine();
